@@ -1,0 +1,6 @@
+framework module Pods_Clone29CM {
+  umbrella header "Pods-Clone29CM-umbrella.h"
+
+  export *
+  module * { export * }
+}
