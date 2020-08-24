@@ -37,6 +37,10 @@ class MainViewController: UIViewController {
     @IBOutlet weak var menuTabCollectionView: UICollectionView!
     @IBOutlet weak var bannerTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var bannerHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var underbarBackgroundView: UIView!
+    @IBOutlet weak var underbarView: UIView!
+    @IBOutlet weak var underbarViewWidth: NSLayoutConstraint!
+    
     
     
     //MARK: LifeCycle Methods
@@ -56,7 +60,17 @@ class MainViewController: UIViewController {
         menuTabCollectionView.selectItem(at: IndexPath(item: 0, section: 0), animated: false, scrollPosition: .bottom)
         //mainTableView.contentInset = UIEdgeInsets(top: -initialHeight,left:0,bottom:0,right:0)
     }
-
+    
+    //MARK:- Custom Methods
+    
+    func setUnderbarAnimation(_ scrollView: UIScrollView){
+        let currentIdx = Int(scrollView.contentOffset.x / scrollView.frame.width)
+        let initialUnderbarWidth = Int(220/bannerImageNameList.count)
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseIn], animations:{
+            self.underbarViewWidth.constant = CGFloat(initialUnderbarWidth + initialUnderbarWidth * currentIdx)
+            self.view.layoutIfNeeded()
+        })
+    }
 
 }
 // 컬렉션뷰
@@ -94,6 +108,8 @@ extension MainViewController: UICollectionViewDataSource{
     
 }
 
+//MARK: Delegate Extensions
+
 extension MainViewController: UICollectionViewDelegateFlowLayout{
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -130,20 +146,28 @@ extension MainViewController: UICollectionViewDelegateFlowLayout{
     }
 }
 
+
 extension MainViewController: UICollectionViewDelegate{
     func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
         
         if  mainBannerCollectionView.contentOffset.x > 375*10{
             let nextIndex = IndexPath(item: 0, section: 0)
-            mainBannerCollectionView.scrollToItem(at: nextIndex, at: .centeredHorizontally, animated: true)
+            mainBannerCollectionView.scrollToItem(at: nextIndex, at: .right, animated: false)
+            
+            
         }
         else if mainBannerCollectionView.contentOffset.x < 0 {
             let nextIndex = IndexPath(item: 10, section: 0)
-            mainBannerCollectionView.scrollToItem(at: nextIndex, at: .centeredHorizontally , animated: true)
-            
-            
+            mainBannerCollectionView.scrollToItem(at: nextIndex, at: .left , animated: false)
         }
+        setUnderbarAnimation(scrollView)
     }
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        setUnderbarAnimation(scrollView)
+        //print(self.underbarView.widthAnchor)
+        
+    }
+    
 //    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
 //        print(mainBannerCollectionView.contentOffset.x)
 //
@@ -153,24 +177,20 @@ extension MainViewController: UICollectionViewDelegate{
 extension MainViewController: UITableViewDelegate{
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         
-        let contentOffsetY = -scrollView.contentOffset.y
+        let contentOffsetY = scrollView.contentOffset.y
         
-        mainBannerCollectionView.translatesAutoresizingMaskIntoConstraints = false
-
-        
-
-        
-        
-//        if contentOffsetY + initialHeight > 88 {
-//            NSLayoutConstraint.activate([self.mainBannerCollectionView.heightAnchor.constraint(equalToConstant: initialHeight + contentOffsetY)])
-//        }
-//        else {
-//            NSLayoutConstraint.activate([self.mainBannerCollectionView.heightAnchor.constraint(equalToConstant: 88)])
-//        }
+        //bottomAnchor를 tableView top에 맞춘다.
+        if contentOffsetY < self.initialHeight {
+            self.bannerHeightConstraint.constant = self.initialHeight - contentOffsetY
+            
+            
+            self.view.layoutIfNeeded()
+            self.view.layoutSubviews()}
+       
         print(scrollView.contentOffset.y)
-        print(mainBannerCollectionView.contentOffset.y)
-        scrollView.setNeedsLayout()
-        scrollView.layoutIfNeeded()
+        print(mainBannerCollectionView.contentSize)
+        //print(mainBannerCollectionView.contentOffset.y)
+
     
         
 //        if (0 < scrollView.contentOffset.y && scrollView.contentOffset.y < 510){

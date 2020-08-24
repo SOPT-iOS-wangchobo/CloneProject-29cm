@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MainBannerCollectionViewCell: UICollectionViewCell {
+class MainBannerCollectionViewCell: UICollectionViewCell{
     
     //MARK: IBOutlets
     
@@ -17,5 +17,8 @@ class MainBannerCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         //bannerImageView.image = UIImage(named: bannerImageName!) 
     }
-    
+    override func layoutSubviews() {
+        self.bannerImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+    }
 }
